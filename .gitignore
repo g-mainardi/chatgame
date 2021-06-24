@@ -1,1 +1,11 @@
 __pycache
+*.toc
+*.synctex.gz
+*.synctex.bbl
+*.synctex.blg
+*.log
+*.out
+report.pdf
+*.aux
+*.bbl
+*.blg
