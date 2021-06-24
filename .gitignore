@@ -1,4 +1,5 @@
-__pycache
+__pycache__
+img
 *.toc
 *.synctex.gz
 *.synctex.bbl
@@ -9,3 +10,7 @@ report.pdf
 *.aux
 *.bbl
 *.blg
+.vs/
+report.fdb_latexmk
+report.fls
+

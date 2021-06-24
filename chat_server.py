@@ -201,7 +201,7 @@ def server_func(host, port):
     trick = "Trabocchetto - Sei eliminato!"
 
     # Tempo del gioco
-    timer = 30
+    timer = 100
 
     # Booleano che indica se il gioco è in corso oppure no (Tempo scaduto)
     playing = True
