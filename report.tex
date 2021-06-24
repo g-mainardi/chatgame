@@ -156,124 +156,84 @@ In questa sezione si mostrano schemi che esemplificano ciò che accade durante i
 
 \chapter{Implementazione}
 
-\section{Testing automatizzato}
-Durante la creazione del modello e prima della costruzione del relativo Controller si è avuto 
-il bisogno di considerare l’uso di test per verificare che ciò che era stato fatto fosse corretto
-e per controllare che eventuali modifiche intraprese non compromettessero il lavoro fatto.
-Per fare questo è stata utilizzata la libreria Junit (versione 5), per rendere i test automatici.
-Le parti controllate in questa fase sono state:
+\section{Struttura Classi}
+Ho realizzato le varie classi in modo tale che classi con funzioni in comune usino le stesse da una libreria.
+Nello specifico il file "chat\_server.py" contiene il codice essenziale per l'esecuzione del server nella 
+funzione principale "server\_func" che prende in ingresso indirizzo e porta con i quali creare il socket.
+Stessa cosa è stata fatta per il Client, realizzando un file "chat\_client.py" che potrà essere importato
+per poi lanciare il client passando indirizzo e porta in cui si deve collegarsi.
+
+Il file server.py chiama la funzione di "chat\_server.py" passando l'indirizzo 127.0.0.1 e la porta 53000.
+Mentre client1.py e client2.py chiamano entrambi "chat\_client.py" passando l'indirizzo e la porta con 
+è stato creato il socket del Server.
+
+\section{Funzioni}
+\subsection{Server}
 \begin{itemize}
-	\item Gestione del combattimento tra diverse unità
-	\item Schieramento e rimozione di un'unità in una corsia
-	\item Movimento delle unità nella corsia
-	\item Generazione del Campo (Field) e interazione con le corsie (Lane)
+	\item accept\_incoming\_connections():
+	
+	Funzione che accetta i client in entrata, controlla se ci siano ruoli disponibili (altrimenti aspetta
+	 un po' e riprova) e per ogni client connesso fa partire un thread per gestirlo.
+	\item handle\_client(client): 
+	
+	Funzione che gestisce il client passato come parametro. Per prima cosa assegna un ruolo al client,
+	glielo comunica, avvisa tutti e poi gli propone il quiz. Se il timer scade, la funzione termina.
+	Se il client ha pescato il trabocchetto allora questa funzione aspetta un po' e lo espelle.
+	\item quiz\ client():
+	
+	Funzione che invia il quiz al client, chiede la scelta finchè non viene risposto con '1' '2' o '3'
+	e se viene preso il trabocchetto allora termina la funzione, altrimenti faccio la domanda pescata.
+	\item check\_answer(client, question):
+	
+	Funzione che controlla se il client risponde bene alla domanda e assegna il punteggio in base al risultato.
+	\item broadcast(msg):
+	
+	Funzione che manda il messaggio in input a tutti i client.
+	\item countdown(timer):
+	
+	Funzione che tiene il timer e stampa ogni secondo su console.
+	\item get\_max\_value(data):
+	
+	Funzione per ottenere una lista delle chiavi di un dizionario che hanno i valori massimi.
+	\item get\_winners():
+	
+	Funzione per avere una lista di stringhe contenente i ruoli dei client vincitori.
+	\item get\_options():
+	
+	Funzione che mi ritorna una lista mescolata contenente due domande e un trabocchetto.
 \end{itemize}
 
-Non volendosi cimentare nel test di interfcce grafiche, sono stati eseguiti periodicamente test manuali 
-del gioco che hanno accompagnato la fase di sviluppo.
-
-\section{Metodologia di lavoro}
-Per il lavoro in team è stato adottato il DVCS Git con un Workflow semplificato che coinsiste nello sviluppo 
-dell'applicazione su un branch develop, dal quale poi un membro in caso di necessità creava un 
-branch separato "feature-nomesperimentazione" in cui ha poteva lavorare autonomamente in parallelo su una 
-funzionalità a lui assegnata, senza interferire significativamente sulla linea di sviluppo principale
-da cui periodicamente ne estraeva eventuali modifiche dei compagni.
-%
-Al termine della corretta implementazione della funzionalità stabilità, si eseguiva un ulteriore pull dal develop
-correggendo eventuali conflitti, per poi riunirsi alla linea di sviluppo principale.
-
-In seguito al raggiungimento di ogni significativo traguardo dell'applicazione si è poi fatta una merge 
-del branch develop su quello principale, il master.
-
-Questo processo si è iterato fino al completamento delle funzionalità poste come obbiettivo che hanno portato
-al termine del lavoro.
-
-Si vuole indicare in questa sezione che tutti e quattro i membri del gruppo hanno lavorato principalmente in ambiente 
-Windows. Si è poi testata la funzionalità dell'applicazione in ambiente Linux, più precisamente nella sistema operativo
-Ubuntu 20.04.2 LTS.
-
-\subsection*{Giosuè Giocondo Mainardi}
-Come primo passo per l'effettivo sviluppo abbiamo fatto uso di schemi UML in cui rappresentavamo le varie interfacce che saremmo
-andati a costruire.
-
-Mi sono concentrato su come poter modellare il dominio applicativo secondo quanto stabilito nelle riunioni periodiche con
-il gruppo cercando di riuscire ad offrire, alle classi dipendenti dalle miei, ciò che era richiesto.
-Per prima cosa mi sono cimentato nella realizzazione di Field e Lane che modellano lo scontro, essendo agli inizi non avevo modo 
-di testare quanto fatto se non con dei Test automatizzati. Grazie a questi ho scovato vari bug man mano e ho modificato poi 
-le varie implementazioni dei metodi in base a ciò che doveva risultare dai test. Ad esempio, inizialmente le unita’ non 
-venivano correttamente rimosse dalle lane, questo succedeva perché nel metodo update rimuovevo dal Set delle unita’, un elemento 
-in un ciclo del foreach, quindi il ciclo si interrompeva perché non riusciva a proseguire con l'iterazione.
-Dopo poco tempo mi sono ricordato che questo problema era stato affrontato in laboratorio e mi sono andato a cercare la soluzione
-che era per l'appunto usare un iteratore per ciclare sulla collezione, così da poter rimuovere senza problemi un oggetto dal Set
-anche durante l'iterazione.
-
-Dopo diverso tempo, quando il campo di gioco è stato realizzato nella view, la mia parte di Model ha saputo rendersi già pronta
-e funzionante senza alcun bisogno di modifiche, grazie ai vari test eseguiti nel corso dello sviluppo.
-
-Per realizzare la parte grafica del campo di gioco ho seguito quanto deciso con il gruppo cioè di adottare una GridPane e di riempirla
-con immagini, che potevano anche essere vuote, la griglia verra’ poi riempita dalle unita’ aggiunte.
-
-Per il tracciamento della posizione delle unita’ nella singola corsia e del punteggio dei giocatori ho deciso di usare una mappa la quale però in caso
-di sovrascrittura di una chiave non offre prestazioni ottime, quindi ho deciso di importare in un package utilities i vari Counter,
-visti come esempi nel corso delle lezioni, così da poter modificare il valore mappato semplicemente andando a richiamare un increment
-Inoltre i Counter mi offrivano anche la possibilità di impostare un limite e di fare un multi incremento, funzionalità che ho 
-sfruttato dato che ho associato ad ogni unita’ il numero di passi che ha compiuto. Così che il raggiungimento della fine della 
-corsia sia il raggiungimento di un certo numero di passi, indipendetemente dalla direzione percorsa.
-
-Ho cercato sempre di mantenere un codice chiaro e pulito fin da subito, predisponendo la documentazione delle interfacce
-quasi immediatamente così da poter fornire agli altri membri una chiara specifica dell'uso della mia parte.
-
-\subsubsection{Classi/Package quasi esclusivamente miei:}
+\subsection{Client}
 \begin{itemize}
-	\item Field e Implementazione
-	\item Lane e Implementazione 
-	\item Utilities Counter
-	\item FieldView e Implementazione
-	\item UnitViewType
-	\item Converter
-	\item Test di Field e Lane
-	\item ViewFactory e Implementazione
+	\item receive():
+	
+	Funzione che prende i messaggi che arrivano sul Socket, li divide in base al separatore
+	e stampa su console i messaggi non vuoti.
+	\item send(event=None):
+	
+	Funzione che prende il contenuto della casella di testo, lo manda al socket e lo stampa 
+	in chat.
+	\item check\_quit(msg):
+	
+	Funzione che controlla se l'input sia una richiesta di uscita, in tal caso, 
+	chiude il socket e la finestra.
+	\item on\_closing(event=None):
+	
+	Funzione invocata per chiudere il Client
 \end{itemize}
 
-\subsubsection{Classi/Package in cui ho dato un contributo:}
+\section{Strutture Dati}
+\subsection{Server}
 \begin{itemize}
-	\item Music e Sound
-	\item Controller e Implementazione
-	\item Timer
-	\item Unit e UnitType
-	\item GameView e Implementazione
-	\item Unit, Implementazione e UnitType
-\end{itemize}
-
-\section{Note di sviluppo}
-
-Inizialmente non sapendo bene come architettare l'applicazione abbiamo sfogliato un po' il repository con i progetti degli 
-anni passati, anche se non abbiamo trovato applicazioni che si avvicinavano al nostro particolare tipo di gioco.
-
-\subsection*{Giosuè Giocondo Mainardi}
-\subsubsection{Elenco feature avanzate utilizzate:}
-\begin{itemize}
-	\item Lambda expressions e Stream dove possibile
-	\item Optional
-	\item Libreria apache.commons per il Pair 
-	\item JavaFX
-	\item Meccanismo di chaching delle immagini
-\end{itemize}
-
-\appendix
-
-\chapter{Esercitazioni di laboratorio}
-
-\section{Mainardi Giosuè Giocondo}
-
-\begin{itemize}
-	\item Laboratorio 04: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=62685#p101504}
-	\item Laboratorio 05: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=62684#p101506}
-	\item Laboratorio 06: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=62579#p100909}
-	\item Laboratorio 07: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=62582#p100911}
-	\item Laboratorio 08: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=63865#p103957}
-	\item Laboratorio 09: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=64639#p104117}
-	\item Laboratorio 10: \url{https://virtuale.unibo.it/mod/forum/discuss.php?d=66753#p106596}
+	\item clients:
+	
+	Dizionario che mappa ogni client con il suo ruolo.
+	\item addresses:
+	
+	Dizionario che mappa ogni client con il suo indirizzo.
+	\item scores:
+	
+	Dizionario che mappa ogni client con il suo punteggio.
 \end{itemize}
 
 \end{document}
